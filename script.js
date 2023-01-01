@@ -1,79 +1,110 @@
+class Calculator {
+    constructor(previousOperandTextElement, currentOperandTextElement){
 
-const numberBtn = document.querySelectorAll(".operand");
-const operatorBtn = document.querySelectorAll(".operator");
-const clearButton = document.querySelector('.clear');
-const equalButton = document.querySelector('.equals');
-
-/*window.addEventListener('keydown', function(e){
-    const key = this.document.querySelector(`button[data-key='${e.keyCode}']`);
-    key.click();
-    console.log(key.click());
-});*/
-
-let displayValue = '0';
-let firstOperand = '';
-let secondOperand = '';
-let firstOperator = '';
-let secondOperator = '';
-let result = '';
-
-function updateDisplay(){
-    const display = document.querySelector("#display");
-    display.innerText = displayValue;
-    display.innerText = displayValue.substring(0,9);
+    this.previousOperandTextElement = previousOperandTextElement;
+    this.currentOperandTextElement = currentOperandTextElement;
+    this.clear()
 }
 
-numberBtn.forEach((number)=> {
-    number.addEventListener('click', function () {
-        firstOperand +=number.value;
-        displayValue = firstOperand;
-        updateDisplay();
-    })
-});
-
-operatorBtn.forEach((operator)=> {
-    operator.addEventListener('click', function () {
-        firstOperator +=operator.value;
-        displayValue = firstOperator;
-        updateDisplay();
-    })
-});
-
-function adding (x,y){
-    return x+y;
-};
-
-function subtracting (x,y){
-    return x-y;
-};
-
-function multi(x,y){
-
-    return x*y;
-};
-
-function dividing(x,y){
-    return x/y;
-};
-
-function modul(x,y){
-    return x%y;
+clear(){
+    this.currentOperand = '';
+    this.previousOperand = '';
+    this.operation = undefined;
 }
 
-function operate (ops,x,y){
+delete(){
+    this.currentOperand = this.currentOperand.toString().slice(0,-1);
 
-    switch (ops){
-        case "+": 
-            return adding(x,y);
-        case "-": 
-            return subtracting(x,y);
-        case "*": 
-            return multi(x,y);
-        case "/": 
-            return dividing(x,y);
-        case "%":
-            return modul(x,y);
+}
+
+appendNumber(number){
+    if (number === '.' && this.currentOperand.includes('.')) return;
+    this.currentOperand = this.currentOperand.toString() + number.toString();
+}
+
+chooseOperation(operation){
+    if (this.currentOperand ==='') return;
+    if (this.previousOperand !== ''){
+        this.compute();
     }
-    
-};
+    this.operation = operation;
+    this.previousOperand = this.currentOperand;
+    this.currentOperand ='';
+}
 
+compute(){
+    let computation;
+    const prev = parseFloat(this.previousOperand)
+    const curr = parseFloat(this.currentOperand)
+
+    if( isNaN(prev) || isNaN(curr)) return;
+
+    switch (this.operation) {
+        case '+':
+            computation = prev + curr;
+            break;
+        case '-':
+            computation = prev - curr;
+            break;
+        case '*':
+            computation = prev * curr;
+            break;
+        case '÷':
+            computation = prev / curr;
+            break;
+        default: 
+            return;
+    }
+    this.currentOperand = computation;
+    this.operation = undefined
+    this.previousOperand = ''
+}
+
+updateDisplay (){
+    this.currentOperandTextElement.innerText = this.currentOperand;
+    this.previousOperandTextElement.innerText = this.previousOperand;
+}
+
+}
+
+const numberButton = document.querySelectorAll("[data-number");
+const operationButton = document.querySelectorAll('[data-operation');
+const equalsButton = document.querySelector('[data-equals');
+const deleteButton = document.querySelector('[data-delete');
+const allClearButton = document.querySelector('[data-all-clear]');
+const previousOperandTextElement = document.querySelector('[data-previous-operand]');
+const currentOperandTextElement = document.querySelector('[data-current-operand]')
+
+const calculator = new Calculator(previousOperandTextElement,currentOperandTextElement);
+
+numberButton.forEach(button => {
+    button.addEventListener('click', ()=> {
+        calculator.appendNumber(button.innerText)
+        calculator.updateDisplay();
+    });
+})
+
+operationButton.forEach(button => {
+    button.addEventListener('click', ()=> {
+        calculator.chooseOperation(button.innerText)
+        calculator.updateDisplay();
+    });
+})
+
+equalsButton.addEventListener('click', ()=> {
+        calculator.compute();
+        calculator.updateDisplay();
+    
+})
+
+allClearButton.addEventListener('click', ()=> {
+    calculator.clear();
+    calculator.updateDisplay();
+
+})
+
+deleteButton.addEventListener('click', ()=> {
+    calculator.delete();
+    calculator.updateDisplay();
+
+})
